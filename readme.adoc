@@ -21,7 +21,7 @@ This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[C
     -b twitter
 ```
 +
-Specifying `localhost` here is fine since we are running the backup command on the host where Couchbase is installed. Alternatively, this command can be run from another machine where Couchbase is installed. In that case, the correct host/port needs to be specified.
+Specifying `localhost` here is fine since we are running the backup command on the host where Couchbase is installed. Alternatively, this command can be run from another machine. In that case, the correct host/port needs to be specified. Bucket name is specified using `-b` option.
 +
 The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty to begin with. Subsequent runs of this command will perform incremental backups.
 +
@@ -66,7 +66,7 @@ Full, incremental and cumulative backups can be performed using `-m` option.
 
 Keeping the backup data on the same host introduces a Single Point of Failure. Its recommended to save the backup data on a remote drive, such as S3.
 
-Create a zipped archive of the backup tagged by year, month, day, hour, minute and seconds. Upload each archive to S3:
+Create a zipped archive of the backup tagged by year, month, day, hour, minute and seconds. Upload the archive to S3:
 
 ```
 filename=twitter-backups-`date +%Y-%m-%d-%H-%M-%S`.tar.gz
