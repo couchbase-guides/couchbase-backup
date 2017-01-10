@@ -28,10 +28,10 @@ This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[C
 .. `-b` option is used to specify the bucket name, `twitter` in this case
 +
 The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty to begin with. Subsequent runs of this command will perform incremental backups.
-+
+
 In addition, this tool can perform backups in the following different ways:
 +
-.. Backup all buckets in an entire cluster. This is the default option when no bucket is specified.
+. Backup all buckets in an entire cluster. This is the default option when no bucket is specified.
 +
 ```
 /opt/couchbase/bin/cbbackup \
@@ -41,7 +41,7 @@ In addition, this tool can perform backups in the following different ways:
     -p password
 ```
 +
-.. Backup all buckets on a single node in cluster by using `--single-node` option.
+. Backup all buckets on a single node in cluster by using `--single-node` option.
 +
 ```
 /opt/couchbase/bin/cbbackup \
@@ -52,7 +52,7 @@ In addition, this tool can perform backups in the following different ways:
     --single-node
 ```
 +
-.. Backup one named bucket on a specified node
+. Backup one named bucket on a specified node
 +
 ```
 /opt/couchbase/bin/cbbackup \
