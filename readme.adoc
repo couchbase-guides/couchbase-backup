@@ -1,12 +1,18 @@
 = Backup and Restore Data In Couchbase Database
 
-Complete details about https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[Backup and Restore].
+Backing up data for a Couchbase database is an essential part of Disaster Recovery plan. This ensures that the data can be restored to the last backup in case of a disaster.
 
-== Backup a server
+This quick start guide will show how to backup and restore data in Couchbase database.
+
+Complete details about the features covered in this guide is at https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[Backup and Restore].
+
+This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[Couchbase install on Amazon EC2] to show backup and restore.
+
+== Backup Data in Couchbase Server
 
 . Create a directory: `sudo mkdir -p /var/lib/couchbase/backups`
-. Give write perms: `sudo chmod 777 /var/lib/couchbase/backups`
-. Backup a server:
+. Give write perms to the directory: `sudo chmod 777 /var/lib/couchbase/backups`
+. Backup one bucket on the cluster:
 +
 ```
 /opt/couchbase/bin/cbbackup \
@@ -17,19 +23,56 @@ Complete details about https://developer.couchbase.com/documentation/server/curr
     -b twitter
 ```
 +
-. Create a zipped archive of the backup tagged by year, month and day. Each archive is then upload to S3:
+The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty. Subsequent runs of this command will perform incremental backups.
++
+In addition, this tool can perform backups in the following different ways:
++
+.. Backup all buckets in an entire cluster. This is the default option when no bucket is specified.
 +
 ```
-filename=twitter-backups-`date +%Y-%m-%d`.tar.gz
+/opt/couchbase/bin/cbbackup \
+    http://<any-node-ip>:8091 \
+    /var/lib/couchbase/backups/ \
+    -u Administrator \
+    -p password
+```
++
+.. Backup all buckets on a single node in cluster by using `--single-node` option.
++
+```
+/opt/couchbase/bin/cbbackup \
+    http://<single-node-ip>:8091 \
+    /var/lib/couchbase/backups/ \
+    -u Administrator \
+    -p password \
+    --single-node
+```
++
+.. Backup one named bucket on a specified node
++
+```
+/opt/couchbase/bin/cbbackup \
+    http://<single-node-ip>:8091 \
+    /var/lib/couchbase/backups/ \
+    -u Administrator \
+    -p password \
+    --single-node \
+    -b <bucket>
+```
++
+. Create a zipped archive of the backup tagged by year, month, day, hour, minute and seconds. Each archive is then upload to S3:
++
+```
+filename=twitter-backups-`date +%Y-%m-%d-%H-%M-%S`.tar.gz
 sudo tar czvf $filename /var/lib/couchbase/backups/
 s3cmd put twitter-backups.tar.gz s3://arungupta.me/
 ```
 +
-Add these commands in a script and copy that script in `/etc/cron.daily` directory to set it up as a daily cron job.
+Add these commands in a script and copy that script in `/etc/cron.daily` directory to set it up as a daily cron job. More details about downloading, installing and confiuring `s3cmd` are available at http://s3tools.org/s3cmd.
 
 Backup: https://developer.couchbase.com/documentation/server/current/cli/cbbackup-tool.html
 
-== Restore
+== Restore Data to Couchbase Server
 
 You may like to restore this data to a local development server.
 
