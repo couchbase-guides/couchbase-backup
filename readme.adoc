@@ -30,7 +30,7 @@ This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[C
 The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty to begin with. Subsequent runs of this command will perform incremental backups.
 
 In addition, this tool can perform backups in the following different ways:
-+
+
 . Backup all buckets in an entire cluster. This is the default option when no bucket is specified.
 +
 ```
