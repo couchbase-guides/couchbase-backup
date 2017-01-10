@@ -1,8 +1,6 @@
 = Backup and Restore Data In Couchbase Database
 
-Backing up data for a Couchbase database is an essential part of Disaster Recovery plan. This ensures that the data can be restored to the last backup in case of a disaster.
-
-This quick start guide will show how to backup and restore data in Couchbase database.
+Backing up data for a Couchbase database is an essential part of Disaster Recovery plan. This ensures that the data can be restored to the last backup in case of a disaster. This quick start guide will show how to backup and restore data in Couchbase database.
 
 Complete details about the features covered in this guide is at https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[Backup and Restore].
 
@@ -10,7 +8,7 @@ This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[C
 
 == Backup Data in Couchbase Server
 
-. Create a directory: `sudo mkdir -p /var/lib/couchbase/backups`
+. Create a directory that will store backup data: `sudo mkdir -p /var/lib/couchbase/backups`
 . Give write perms to the directory: `sudo chmod 777 /var/lib/couchbase/backups`
 . Backup one bucket on the cluster:
 +
@@ -23,7 +21,9 @@ This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[C
     -b twitter
 ```
 +
-The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty. Subsequent runs of this command will perform incremental backups.
+Specifying `localhost` here is fine since we are running the backup command on the host where Couchbase is installed. Alternatively, this command can be run from another machine where Couchbase is installed. In that case, the correct host/port needs to be specified.
++
+The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty to begin with. Subsequent runs of this command will perform incremental backups.
 +
 In addition, this tool can perform backups in the following different ways:
 +
@@ -59,18 +59,22 @@ In addition, this tool can perform backups in the following different ways:
     --single-node \
     -b <bucket>
 ```
-+
-. Create a zipped archive of the backup tagged by year, month, day, hour, minute and seconds. Each archive is then upload to S3:
-+
+
+Full, incremental and cumulative backups can be performed using `-m` option.
+
+== Optional Upload to S3
+
+Keeping the backup data on the same host introduces a Single Point of Failure. Its recommended to save the backup data on a remote drive, such as S3.
+
+Create a zipped archive of the backup tagged by year, month, day, hour, minute and seconds. Upload each archive to S3:
+
 ```
 filename=twitter-backups-`date +%Y-%m-%d-%H-%M-%S`.tar.gz
 sudo tar czvf $filename /var/lib/couchbase/backups/
 s3cmd put twitter-backups.tar.gz s3://arungupta.me/
 ```
-+
-Add these commands in a script and copy that script in `/etc/cron.daily` directory to set it up as a daily cron job. More details about downloading, installing and confiuring `s3cmd` are available at http://s3tools.org/s3cmd.
 
-Backup: https://developer.couchbase.com/documentation/server/current/cli/cbbackup-tool.html
+Add these commands in a script. Copy that script in `/etc/cron.daily` directory to set it up as a daily cron job. More details about downloading, installing and confiuring `s3cmd` are available at http://s3tools.org/s3cmd.
 
 == Restore Data to Couchbase Server
 
