@@ -21,7 +21,11 @@ This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[C
     -b twitter
 ```
 +
-Specifying `localhost` here is fine since we are running the backup command on the host where Couchbase is installed. Alternatively, this command can be run from another machine. In that case, the correct host/port needs to be specified. Bucket name is specified using `-b` option.
+.. `cbbackup` is the tool used to perform the backup
+.. Host/port defines the source of backup. Specifying `localhost` here is fine since we are running the backup command on the host where Couchbase is installed. Alternatively, this command can be run from another machine. In that case, the correct host/port needs to be specified.
+.. `-u` option is used to specify the admin user name
+.. `-p` option is used to specify the admin password
+.. `-b` option is used to specify the bucket name, `twitter` in this case
 +
 The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty to begin with. Subsequent runs of this command will perform incremental backups.
 +
