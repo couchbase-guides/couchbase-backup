@@ -1,0 +1,39 @@
+= Backup and Restore Data In Couchbase Database
+
+Complete details about https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[Backup and Restore].
+
+== Backup a server
+
+. Create a directory: `sudo mkdir -p /var/lib/couchbase/backups`
+. Give write perms: `sudo chmod 777 /var/lib/couchbase/backups`
+. Backup a server:
++
+```
+/opt/couchbase/bin/cbbackup \
+    http://localhost:8091 \
+    /var/lib/couchbase/backups/ \
+    -u Administrator \
+    -p password \
+    -b twitter
+```
++
+. Create a zipped archive of the backup tagged by year, month and day. Each archive is then upload to S3:
++
+```
+filename=twitter-backups-`date +%Y-%m-%d`.tar.gz
+sudo tar czvf $filename /var/lib/couchbase/backups/
+s3cmd put twitter-backups.tar.gz s3://arungupta.me/
+```
++
+Add these commands in a script and copy that script in `/etc/cron.daily` directory to set it up as a daily cron job.
+
+Backup: https://developer.couchbase.com/documentation/server/current/cli/cbbackup-tool.html
+
+== Restore
+
+You may like to restore this data to a local development server.
+
+Restore: https://developer.couchbase.com/documentation/server/current/cli/cbrestore-tool.html
+
+For Couchbase Server Enterprise Edition, use https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr].
+
