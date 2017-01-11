@@ -66,6 +66,8 @@ In addition, this tool can perform backups in the following different ways:
 
 Full, incremental and cumulative backups can be performed using `-m` option.
 
+Complete details about the `cbbackup` command, including all the options, are explained at https://developer.couchbase.com/documentation/server/current/cli/cbbackup-tool.html.
+
 == Optional Upload to S3
 
 Keeping the backup data on the same host introduces a Single Point of Failure. Its recommended to save the backup data on a remote drive, such as S3.
@@ -75,16 +77,55 @@ Create a zipped archive of the backup tagged by year, month, day, hour, minute a
 ```
 filename=twitter-backups-`date +%Y-%m-%d-%H-%M-%S`.tar.gz
 sudo tar czvf $filename /var/lib/couchbase/backups/
-s3cmd put twitter-backups.tar.gz s3://arungupta.me/
+s3cmd put $filename s3://arungupta.me/
 ```
 
-Add these commands in a script. Copy that script in `/etc/cron.daily` directory to set it up as a daily cron job. More details about downloading, installing and confiuring `s3cmd` are available at http://s3tools.org/s3cmd.
+More details about downloading, installing and configuring `s3cmd` are available at http://s3tools.org/s3cmd.
+
+Add these commands in a script. Copy that script in `/etc/cron.daily` directory to set it up as a daily cron job. This script may be copied to `/etc/cron.hourly` for hourly backups. https://help.ubuntu.com/community/CronHowto[CronHowTo] explain other configuration options to configure cron on Ubuntu.
 
 == Restore Data to Couchbase Server
 
-You may like to restore this data to a local development server.
+You may like to restore data on a different server, likely for local testing or development.
 
-Restore: https://developer.couchbase.com/documentation/server/current/cli/cbrestore-tool.html
+Backed up data can be restore on a different Couchbase database as:
 
-For Couchbase Server Enterprise Edition, use https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr].
+```
+cbrestore \
+    -b twitter \
+    -B twitter 
+    var/lib/couchbase/backups \
+    http://localhost:8091
+```
+
+In this command:
+
+. `-b` specify the source bucket
+. `-B` specify the destination bucket
+. `var/lib/couchbase/backups` is the directory extracted from the tar file that contains backup data
+. `localhost:8091` is the destination Couchbase host and port
+
+This command will give the error:
+
+```
+2017-01-10 19:50:48,660: s0 error: async operation: error: map missing vbucket_id: 512; perhaps your source does not have vbuckets; if so, try using moxi (HOST:11211) as a destination on sink: http://localhost:8091(twitter@127.0.0.1:8091)
+error: map missing vbucket_id: 512; perhaps your source does not have vbuckets; if so, try using moxi (HOST:11211) as a destination
+```
+
+This error occurs because Couchbase creates 64 vBuckets on Mac OS and 1024 vBuckets on every where else. The concept of vBuckets is explained at https://developer.couchbase.com/documentation/server/current/concepts/distributed-data-management.html. The database was backed up from a Couchbase database running on Ubuntu and restored on a Couchbase database running on Mac OS. Fixing this error requires to rehash the data correctly from 1024 vBuckets on Ubuntu to 64 vBuckets on Mac OS. 
+
+The command that restores the backed up data is:
+
+```
+cbrestore \
+    -b twitter \
+    -B twitter 
+    var/lib/couchbase/backups \
+    http://localhost:8091
+    -x rehash=1
+```
+
+Complete details about the `cbrestore` command, including all the options, are explained at https://developer.couchbase.com/documentation/server/current/cli/cbrestore-tool.html
+
+For Couchbase Server Enterprise Edition, use https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr] to backup and restore.
 
