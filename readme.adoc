@@ -101,7 +101,7 @@ cbrestore \
 In this command:
 
 . `-b` specify the source bucket
-. `-B` specify the destination bucket
+. `-B` specify the destination bucket. Make sure the destination is already created.
 . `var/lib/couchbase/backups` is the directory extracted from the tar file that contains backup data
 . `localhost:8091` is the destination Couchbase host and port
 
