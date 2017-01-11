@@ -2,7 +2,7 @@
 
 Backing up data for a Couchbase database is an essential part of Disaster Recovery plan. This ensures that the data can be restored to the last backup in case of a disaster. This quick start guide will show how to backup and restore data in Couchbase database.
 
-Complete details about the features covered in this guide is at https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[Backup and Restore].
+Complete details about the features covered in this guide is at https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[Backup and Restore]. For Couchbase Server Enterprise Edition, use https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr] to backup and restore.
 
 This guide will use a https://github.com/couchbase-guides/couchbase-amazon-cli[Couchbase install on Amazon EC2] to show backup and restore.
 
@@ -68,7 +68,7 @@ Full, incremental and cumulative backups can be performed using `-m` option.
 
 Complete details about the `cbbackup` command, including all the options, are explained at https://developer.couchbase.com/documentation/server/current/cli/cbbackup-tool.html.
 
-== Optional Upload to S3
+=== Optional Upload to S3
 
 Keeping the backup data on the same host introduces a Single Point of Failure. Its recommended to save the backup data on a remote drive, such as S3.
 
@@ -86,9 +86,9 @@ Add these commands in a script. Copy that script in `/etc/cron.daily` directory 
 
 == Restore Data to Couchbase Server
 
-You may like to restore data on a different server, likely for local testing or development.
+You may like to restore the backed up data on a different server, likely for local testing or development.
 
-Backed up data can be restore on a different Couchbase database as:
+Backed up data can be restored on a different Couchbase database as:
 
 ```
 cbrestore \
@@ -112,9 +112,9 @@ This command will give the error:
 error: map missing vbucket_id: 512; perhaps your source does not have vbuckets; if so, try using moxi (HOST:11211) as a destination
 ```
 
-This error occurs because Couchbase creates 64 vBuckets on Mac OS and 1024 vBuckets on every where else. The concept of vBuckets is explained at https://developer.couchbase.com/documentation/server/current/concepts/distributed-data-management.html. The database was backed up from a Couchbase database running on Ubuntu and restored on a Couchbase database running on Mac OS. Fixing this error requires to rehash the data correctly from 1024 vBuckets on Ubuntu to 64 vBuckets on Mac OS. 
+This error occurs because Couchbase creates 64 vBuckets on Mac OS and 1024 vBuckets on every where else. The concept of vBuckets is explained at https://developer.couchbase.com/documentation/server/current/concepts/distributed-data-management.html[Couchbase Distributed Data Management]. The database was backed up from a Couchbase database running on Ubuntu and restored on a Couchbase database running on Mac OS. Fixing this error requires to rehash the data correctly from 1024 vBuckets on Ubuntu to 64 vBuckets on Mac OS. 
 
-The command that restores the backed up data is:
+The option that enables rehashing can be included in the original command. The updated command that restores the data is:
 
 ```
 cbrestore \
@@ -126,6 +126,4 @@ cbrestore \
 ```
 
 Complete details about the `cbrestore` command, including all the options, are explained at https://developer.couchbase.com/documentation/server/current/cli/cbrestore-tool.html
-
-For Couchbase Server Enterprise Edition, use https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr] to backup and restore.
 
