@@ -93,7 +93,9 @@ Backed up data can be restored on a different Couchbase database as:
 ```
 cbrestore \
     -b twitter \
-    -B twitter 
+    -B twitter \
+    -u <admin-username> \
+    -p <admin-password> \
     var/lib/couchbase/backups \
     http://localhost:8091
 ```
@@ -102,6 +104,8 @@ In this command:
 
 . `-b` specify the source bucket
 . `-B` specify the destination bucket. Make sure the destination is already created.
+. `-u` specify the admin username for the node/cluster
+. `-p` specify the admin password for the node/cluster
 . `var/lib/couchbase/backups` is the directory extracted from the tar file that contains backup data
 . `localhost:8091` is the destination Couchbase host and port
 
