@@ -109,7 +109,7 @@ In this command:
 . `var/lib/couchbase/backups` is the directory extracted from the tar file that contains backup data
 . `localhost:8091` is the destination Couchbase host and port
 
-This command will give the error:
+This command will succeed if the source and destination operating systems are Unix. However, on Mac OS, this command will give the following error:
 
 ```
 2017-01-10 19:50:48,660: s0 error: async operation: error: map missing vbucket_id: 512; perhaps your source does not have vbuckets; if so, try using moxi (HOST:11211) as a destination on sink: http://localhost:8091(twitter@127.0.0.1:8091)
