@@ -1,98 +1,105 @@
 = Backup Data in Couchbase Database
 
-Backing up data for a Couchbase database is an essential part of Disaster Recovery plan. This ensures that the data can be restored to the last backup in case of a disaster. This quick start guide will show how to backup data using Couchbase Community Edition. https://github.com/couchbase-guides/couchbase-restore[Another guide] shows how to restore data to a Couchbase server.
+Backing up data for a Couchbase database is an essential part of a Disaster Recovery plan. This ensures that the data can be restored to the last backup in case of a disaster. This quick start guide will show how to backup data using Couchbase Community Edition. https://github.com/couchbase-guides/couchbase-restore[Another guide shows how to restore data] to a Couchbase server.
 
-The https://developer.couchbase.com/documentation/server/current/backup-restore/backup-restore.html[cbbackup] tool in Couchbase Community Edition will be used in this guide.
+Couchbase Server has a command line tool called `cbbackupmgr`. Complete details about this tool is at https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr].
 
-In addition, Couchbase Enterprise Edition also has the `cbbackupmgr` tool. Complete details about this tool is at https://developer.couchbase.com/documentation/server/current/backup-restore/enterprise-backup-restore.html[cbbackupmgr].
+For this guide, Couchbase Server is installed locally on a Windows machine. But similar instructions can be followed for other operating systems or cloud deployment.
 
-For this guide, Couchbase server is installed using https://github.com/couchbase-guides/couchbase-amazon-cli[Couchbase install on Amazon EC2].
+Let's backup the data first.
 
-Let's take backup of the data first.
+. Create a directory that will store backup data. `PS C:\myprojects> mkdir couchbasebackups`
+. You may need to give write permissions to the directory, depending on your OS.
 
-. Create a directory that will store backup data: `sudo mkdir -p /var/lib/couchbase/backups`
-. Give write perms to the directory: `sudo chmod 777 /var/lib/couchbase/backups`
+== Backup configuration
 
-== Backup one bucket in cluster
+You need to configure the folder to act as a backup archive. To backup an entire cluster, for instance, start by creating an archive like this:
 
-The `cbbackup` tool allows to backup single bucket from the cluster.
+[source,PowerShell]
+----
+PS C:\myprojects> & 'C:\Program Files\Couchbase\Server\bin\cbbackupmgr.exe' config --archive C:\myprojects\couchbasebackups\ --repo cluster
 
-Backup one bucket on the cluster:
+Backup repository `cluster` created successfully in archive `C:\myprojects\couchbasebackups\`
 
-```
-/opt/couchbase/bin/cbbackup \
-    http://localhost:8091 \
-    /var/lib/couchbase/backups/ \
-    -u Administrator \
-    -p password \
-    -b twitter
-```
+PS C:\myprojects>
+----
 
-. `cbbackup` is the tool used to perform the backup
-. Host/port defines the source of backup. Specifying `localhost` here is fine since we are running the backup command on the host where Couchbase is installed. Alternatively, this command can be run from another machine. In that case, the correct host/port needs to be specified.
-. `/var/lib/couchbase/backups` is the directory where backup will be stored
-. `-u` option is used to specify the admin user name
-. `-p` option is used to specify the admin password
-. `-b` option is used to specify the bucket name, `twitter` in this case
+Once you've done this, you can execute the `list` command to see the archive contents. There should be one archive in there named "cluster".
 
-The first run of this command will perform a full backup because `/var/lib/couchbase/backups/` directory is empty to begin with. Subsequent runs of this command will perform incremental backups.
+[source,PowerShell]
+----
+PS C:\myprojects> & 'C:\Program Files\Couchbase\Server\bin\cbbackupmgr.exe' list --archive C:\myprojects\couchbasebackups\
+ Size      Items          Name
+ 0B        -              /
+ 0B        -              + cluster
+PS C:\myprojects>
+----
 
-== Backup all buckets in cluster
+You can also configure cbbackupmgr to include/exclude buckets, exclude views, indexes, etc. For the full details, check out the documentation on link:https://developer.couchbase.com/documentation/server/current/backup-restore/cbbackupmgr-config.html[cbbackupmgr config].
 
-Backup all buckets in an entire cluster. This is the default option when no bucket is specified.
+== Backup the cluster
 
-```
-/opt/couchbase/bin/cbbackup \
-    http://<any-node-ip>:8091 \
-    /var/lib/couchbase/backups/ \
-    -u Administrator \
-    -p password
-```
+To backup with the given configuration, execute a command like this:
 
-== Back up all buckets on a single node
+[source,PowerShell]
+----
+PS C:\myprojects> & 'C:\Program Files\Couchbase\Server\bin\cbbackupmgr.exe' backup --archive C:\myprojects\couchbasebackups\ --repo cluster --c couchbase://localhost --username Administrator --password password
 
-Backup all buckets on a single node in cluster by using `--single-node` option.
+Backing up to 2017-06-12T15_05_40.3096949-04_00
+Copied all data in 12.01s (Avg. 11.67KB/Sec)                                                         0 items / 140.00KB
+mybucket                [=====================================================================================] 100.00%
 
-```
-/opt/couchbase/bin/cbbackup \
-    http://<single-node-ip>:8091 \
-    /var/lib/couchbase/backups/ \
-    -u Administrator \
-    -p password \
-    --single-node
-```
+myotherbucket                [=====================================================================================] 100.00%
 
-== Backup one bucket on a specified node
+travel-sample           [=====================================================================================] 100.00%
 
-Backup one named bucket on a specified node
+Backup successfully completed
+PS C:\myprojects>
+----
 
-```
-/opt/couchbase/bin/cbbackup \
-    http://<single-node-ip>:8091 \
-    /var/lib/couchbase/backups/ \
-    -u Administrator \
-    -p password \
-    --single-node \
-    -b <bucket>
-```
+Notice that I've need to specify the location of the cluster (localhost), the username and password of an administrator account, and the name of the repo (which as we saw earlier was named "cluster".
 
-Full, incremental and cumulative backups can be performed using `-m` option.
+If you go back and execute the `list` command from earlier, you'll see more detail about what was backed up, and when. Here's a short example that shows two dated backups.
 
-Complete details about the `cbbackup` command, including all the options, are explained at https://developer.couchbase.com/documentation/server/current/cli/cbbackup-tool.html.
+[source,PowerShell]
+----
+PS C:\zproj> & 'C:\Program Files\Couchbase\Server\bin\cbbackupmgr.exe' list --archive C:\zproj\couchbasebackups\
+ Size      Items          Name
+ 567.91MB  -              /
+ 567.91MB  -              + cluster
+ 317.76MB  -                  + 2017-06-12T15_05_13.877654-04_00
+ 50.31MB   -                      + mybucket
+ 365B      0                          bucket-config.json
+ 50.30MB   6                          + data
+ 50.30MB   6                              shard_0.fdb
+ 2B        0                          full-text.json
+ 1.56KB    1                          gsi.json
+ 2B        0                          views.json
+ 50.08MB   -                      + myotherbucket
 
-== Optional Upload to S3
+... etc ...
 
-Keeping the backup data on the same host introduces a Single Point of Failure. Its recommended to save the backup data on a remote drive, such as S3.
+ 250.16MB  -                  + 2017-06-12T15_05_40.3096949-04_00
+ 50.03MB   -                      + mybucket
+ 365B      0                          bucket-config.json
+ 50.02MB   0                          + data
+ 50.02MB   0                              shard_0.fdb
+ 2B        0                          full-text.json
+ 1.56KB    1                          gsi.json
+ 2B        0                          views.json
+ 50.03MB   -                      + myotherbucket
 
-Create a zipped archive of the backup tagged by year, month, day, hour, minute and seconds. Upload the archive to S3:
+... etc ...
 
-```
-filename=twitter-backups-`date +%Y-%m-%d-%H-%M-%S`.tar.gz
-sudo tar czvf $filename /var/lib/couchbase/backups/
-s3cmd put $filename s3://arungupta.me/
-```
+PS C:\zproj>
+----
 
-More details about downloading, installing and configuring `s3cmd` are available at http://s3tools.org/s3cmd.
+== Put the backup someplace safe
 
-Add these commands in a script. Copy that script in `/etc/cron.daily` directory to set it up as a daily cron job. This script may be copied to `/etc/cron.hourly` for hourly backups. https://help.ubuntu.com/community/CronHowto[CronHowTo] explain other configuration options to configure cron on Ubuntu.
+Keeping the backup data on the same host introduces a single point of failure. It's recommended to save the backup data on a remote drive. Somewhere outside of the same datacenter at least, or maybe a cloud provider like Amazon's S3.
 
+Add these cbbackupmfg commands to a script that will be automatically run on a schedule (like a https://help.ubuntu.com/community/CronHowto[Cron job] or a link:https://technet.microsoft.com/en-us/library/jj649816(v=wps.630).aspx[Scheduled Task Cmdlet]). You may also want to make ZIP a part of this backup task to save disk space.
+
+== Summary
+
+In this quick start guide, you went from no backup to having a backup in just a few commands. The cbbackupmgr tool has a lot of options to suit your needs, so make sure to check out the full documentation to see how it fits your organization's backup strategy. Also check out the link:https://github.com/couchbase-guides/couchbase-restore[Restore quick start guide] so you are able to test restoring (because what good is a backup if you can't restore it).
