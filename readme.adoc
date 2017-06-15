@@ -98,7 +98,7 @@ PS C:\zproj>
 
 Keeping the backup data on the same host introduces a single point of failure. It's recommended to save the backup data on a remote drive. Somewhere outside of the same datacenter at least, or maybe a cloud provider like Amazon's S3.
 
-Add these cbbackupmfg commands to a script that will be automatically run on a schedule (like a https://help.ubuntu.com/community/CronHowto[Cron job] or a link:https://technet.microsoft.com/en-us/library/jj649816(v=wps.630).aspx[Scheduled Task Cmdlet]). You may also want to make ZIP a part of this backup task to save disk space.
+Add these cbbackupmgr commands to a script that will be automatically run on a schedule (like a https://help.ubuntu.com/community/CronHowto[Cron job] or a link:https://technet.microsoft.com/en-us/library/jj649816(v=wps.630).aspx[Scheduled Task Cmdlet]). You may also want to make ZIP a part of this backup task to save disk space.
 
 == Summary
 
